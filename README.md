@@ -3,6 +3,8 @@ Quick Tips For C# Programming.
 
 Examples are taken from the book [C# 6.0 Cookbook](https://www.amazon.com/6-0-Cookbook-Solutions-Developers-ebook/dp/B015YOJS6I)
 
+Obviously, won't be covering all of it, but only those that are really interesting (to me)
+
 ### Structs VS Classes
 ---
 
@@ -73,4 +75,54 @@ val?.Trim().ToUpper();
 `?` can also be chained
 
 `Person?.Address?.State?.Trim();`
+
+### Testing every element in a collection
+---
+
+Use `TrueForAll` method
+
+```
+List<string> strings = new List<string>() {"one", "two", null};
+
+string str = strings.TrueForAll(delegate(string val)
+{
+   val? retrun true : return false;
+}
+```
+
+`TrueForAll` accepts a generic delegate `Predicate<T>` called `match`
+
+`public bool TrueForAll(Predicate<T> match)`
+
+`match` determines if `TrueForAll` should return true or false
+
+### Handling Concurrency
+---
+
+`ConcurrencyDictionary<TKey, TValue>` for multiple read and writes
+
+`ImmuatableDictionary<TKey, TValue>` for multiple reads
+
+### Detecting sneaky overflows
+---
+
+Use the keyword `checked` to check if overflows have silently occured
+
+An `OverflowException` is thrown when the checked code fails
+
+```
+long lhs = 34000;
+long rhs = long.MaxValue;
+
+try
+{
+   check((int)(lhs + rhs))
+}
+catch (OverflowException)
+{
+   ...
+}
+```
+
+C# code can run in checked and unchecked mode. The default is unchecked
 
