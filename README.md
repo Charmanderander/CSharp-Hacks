@@ -126,3 +126,164 @@ catch (OverflowException)
 
 C# code can run in checked and unchecked mode. The default is unchecked
 
+### Lambda
+---
+
+`<Type> <variable name> = s => <function on s>`
+
+The variables inside the lambda expression can be defined outside the expression
+
+```
+public void CountUp()
+{
+   int count = 0;
+   
+   // count is defined outside the lambda expression
+   Func<int> countUp = () = count++;
+   
+   for (int i = 0; i < 10; i++)
+      countUp();
+}
+```
+
+Expression Lambdas have no paramters
+
+`Func<int> countUp = () => count++;`
+
+Statement Lambdas take paramters, and are enclosed in curly brackets
+
+```
+Func<int, int> writeInt = i =>
+{
+   Console.WriteLine(i);
+   return i;
+}
+```
+
+### Parallel LINQ
+---
+
+When working with multiple results of LINQ query, we can process them in parallel
+
+`chapters.Select(c => TimedEvaluateChapter(c, rnd)).ToList();`
+
+`chapters.AsParallel().Select(c => EvaluateChapter(c)).ToList();`
+
+Use sparingly only for large data, for parallelism has some overheads.
+
+### More Verbose Error Handling
+---
+
+Use the `Data` field in `System.Exception`, which functions as a dictionary
+
+```
+try
+{
+...
+{
+catch(Exception e)
+{
+   e.Data["Cause"] = "File not found!";
+}
+```
+
+### Building Objects Dynamically
+---
+
+Use `ExpandoObject()` to create objects on the fly
+
+```
+dynamic expando = new ExpandoObject();
+
+// Adding field
+expando.name = "John";
+
+// Adding function
+expando.IsValid = (Func<bool>) ( () =>
+{
+
+// Do validation checks
+
+});
+
+// Adding property
+AddProperty(expando, "Language", "English");
+
+// Adding event
+AddEvent(expando, "LanguagedChanged", eventHandler);
+```
+
+### Locking a FileStream for concurrency
+---
+
+Use the `Lock` method in `FileStream`
+
+```
+FileStream fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite, 4096, useAsync: true);
+
+
+// Locks the entire file
+fs.Lock(0, fileStreamLength);
+
+// Locks a portion of the file
+fs.Lock(0, fileStreamLength - 10);
+```
+
+### Making Static not shareable between threads
+---
+
+Static fields by default are shared between threads. Use `ThreadStaticAttribute` to mark `static` fields as not shareable between threads
+
+```
+public class Foo
+{
+   [ThreadStaticAttribute()]
+   public static string foo = "my string";
+}
+```
+
+### Locks for concurrency
+---
+
+Create an object, and lock it
+
+```
+public static class Locking
+{
+   private static int num = 1;
+   private static object syncObject = new object();
+
+   public static void increment()
+   {
+      lock(syncObject)
+      {
+         num++;
+      }
+   }
+   
+   public static void decrement()
+   {
+      lock(syncObject)
+      {
+         num--;
+      }
+   }
+}
+```
+
+DONT DO NESTED LOCKING. Each class should create and use its own internal lock.
+
+### Thread Local Storage
+---
+
+Storing data to each thread for privacy. Use `AllocateDataSlot`, `AllocateNamedDataSlot` or `GetNamedDataSlot`
+
+### Optimizing Database requests
+---
+
+For database request, use `async` and `await` keywords, so your main thread can do something else while the database is processing
+
+### Running tasks in order
+---
+
+Use the keyword `Task.ContinueWith`
